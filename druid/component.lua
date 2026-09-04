@@ -21,6 +21,7 @@ local helper = require("druid.helper")
 ---@field _uid number
 
 ---@class druid.component
+---@field enabled boolean Current enabled state of the component GUI node
 ---@field protected druid druid.instance Druid instance to create inner components
 ---@field protected init fun(self:druid.component, ...)|nil Called when component is created
 ---@field protected update fun(self:druid.component, dt:number)|nil Called every frame
@@ -38,6 +39,21 @@ local helper = require("druid.helper")
 ---@field private _component druid.component.component
 ---@field private _meta druid.component.meta
 local M = {}
+
+
+local original_gui_set_enabled = gui.set_enabled
+local components_by_node = setmetatable({}, { __mode = "k" })
+
+gui.set_enabled = function(node, enabled)
+	original_gui_set_enabled(node, enabled)
+
+	local components = components_by_node[node]
+	if components then
+		for instance in pairs(components) do
+			instance.enabled = enabled
+		end
+	end
+end
 
 
 local uid = 0
@@ -277,6 +293,7 @@ end
 ---@return druid.component BaseComponent itself
 ---@private
 function M:setup_component(druid_instance, context, style, instance_class)
+	self.enabled = true
 	self._meta = {
 		template = "",
 		context = context,
@@ -297,6 +314,30 @@ function M:setup_component(druid_instance, context, style, instance_class)
 	end
 
 	return self
+end
+
+
+---@private
+function M:__track_enabled_state()
+	if not self.node then
+		return
+	end
+
+	self.enabled = gui.is_enabled(self.node, false)
+	local components = components_by_node[self.node]
+	if not components then
+		components = setmetatable({}, { __mode = "k" })
+		components_by_node[self.node] = components
+	end
+	components[self] = true
+end
+
+
+---@private
+function M:__restore_enabled_state()
+	if self.node then
+		original_gui_set_enabled(self.node, self.enabled)
+	end
 end
 
 
@@ -412,6 +453,7 @@ function M.create_widget(self, widget_class, context)
 	local instance = setmetatable({}, {
 		__index = setmetatable(widget_class, WIDGET_METATABLE)
 	}) --[[@as druid.widget]]
+	instance.enabled = true
 
 	instance._component = {
 		_uid = M.create_uid(),

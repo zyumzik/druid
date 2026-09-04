@@ -611,6 +611,15 @@ function M:new_widget(widget, template, nodes, ...)
 end
 
 
+local node_component = require("druid.base.node")
+---Create Node component
+---@param node string|node The node_id or gui.get_node(node_id)
+---@return druid.node node The new node component
+function M:new_node(node)
+	return self:new(node_component, node)
+end
+
+
 local button = require("druid.base.button")
 ---Create Button component
 ---@param node string|node The node_id or gui.get_node(node_id)

@@ -56,7 +56,7 @@ self.health_bar = self.druid:new_widget(health_bar, "health_bar")
 
 ## Features
 
-- **Components** - Button, scroll, data list, input, and the rest. Logic over nodes you already placed
+- **Components** - Button, scroll, infinity lists, input and the many others. Logic over nodes you already placed inside GUI
 - **Widgets** - A reusable piece is a `.gui` plus a `.lua`
 - **Input** - Stack-based, with priority. Last created is checked first
 - **Events** - Callbacks via [Defold Event](https://github.com/Insality/defold-event)
@@ -86,7 +86,7 @@ https://github.com/Insality/defold-event/archive/refs/tags/16.zip
 **[Druid](https://github.com/Insality/druid/)**
 
 ```
-https://github.com/Insality/druid/archive/refs/tags/1.3.0.zip
+https://github.com/Insality/druid/archive/refs/tags/1.3.1.zip
 ```
 
 After that, select `Project ▸ Fetch Libraries` to update [library dependencies]((https://defold.com/manuals/libraries/#setting-up-library-dependencies)). This happens automatically whenever you open a project so you will only need to do this if the dependencies change without re-opening the project.
@@ -279,10 +279,6 @@ Read the [CONTRIBUTING.md](CONTRIBUTING.md) file for more information.
 
 ## ❤️ Support project ❤️
 
-Druid is developed and maintained by a single developer in his free time.
-
 If this library helps your project, consider supporting my work ❤️
-
-It really makes a difference.
 
 [![Github-sponsors](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA)](https://github.com/sponsors/insality) [![Ko-Fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/insality) [![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/insality)

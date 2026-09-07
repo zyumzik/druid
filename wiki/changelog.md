@@ -934,3 +934,9 @@ The rest are fixes and small API additions. There are several breaking changes, 
 - The Input component does not consume the modificator keys and `tab` anymore while it is selected. If your app has hotkeys with these keys, they will now trigger while the user is typing in the input field. Disable them on the `on_input_select` event if that is not what you want.
 - The Slider and the Rich Input caret now use the correct click position on a scaled GUI. If you compensated for the old double scale on your side, remove that compensation.
 - `progress:set_to`, `timer:set_to`, `lang_text:set_to` and `text:set_to` still work, but are deprecated in favor of `set_value` / `set_text`.
+
+### Druid 1.3.1
+- [System] Fix `set_whitelist({})` to allow none instead of allowing all
+	- `set_whitelist(nil)` clears the whitelist, all components receive input
+	- `set_whitelist({})` is an empty allow-list, no component receives input
+	- `set_blacklist({})` and `nil` both still deny nobody

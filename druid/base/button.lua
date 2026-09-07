@@ -76,7 +76,7 @@ function M:init(node_or_node_id, callback, custom_args, anim_node)
 	self.start_scale = gui.get_scale(self.anim_node)
 	self.start_pos = gui.get_position(self.anim_node)
 	self.params = custom_args
-	self.hover = self.druid:new_hover(node_or_node_id, self.button_hover)
+	self.hover = self.druid:new_hover(self.node, self.button_hover)
 	self.hover.on_mouse_hover:subscribe(self.button_mouse_hover)
 	self.click_zone = nil
 	self.is_repeated_started = false

@@ -21,6 +21,7 @@ local helper = require("druid.helper")
 ---@field _uid number
 
 ---@class druid.component
+---@field enabled boolean Current enabled state of the component GUI node
 ---@field protected druid druid.instance Druid instance to create inner components
 ---@field protected init fun(self:druid.component, ...)|nil Called when component is created
 ---@field protected update fun(self:druid.component, dt:number)|nil Called every frame
@@ -277,6 +278,7 @@ end
 ---@return druid.component BaseComponent itself
 ---@private
 function M:setup_component(druid_instance, context, style, instance_class)
+	self.enabled = true
 	self._meta = {
 		template = "",
 		context = context,
@@ -412,6 +414,7 @@ function M.create_widget(self, widget_class, context)
 	local instance = setmetatable({}, {
 		__index = setmetatable(widget_class, WIDGET_METATABLE)
 	}) --[[@as druid.widget]]
+	instance.enabled = true
 
 	instance._component = {
 		_uid = M.create_uid(),

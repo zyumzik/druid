@@ -258,6 +258,9 @@ function M:new(component, ...)
 	if instance.init then
 		instance:init(...)
 	end
+	if instance.node then
+		instance.enabled = gui.is_enabled(instance.node, false)
+	end
 
 	if instance.on_late_init or (not self.input_inited and instance.on_input) then
 		schedule_late_init(self._root)
@@ -436,8 +439,17 @@ end
 ---@param sender url Sender from on_message
 function M:on_message(message_id, message, sender)
 	if message_id == const.MSG_LAYOUT_CHANGED then
+		-- Restore a real gui state depending on a component enabled state
+		local components = self.components_all
+		for i = 1, #components do
+			local component = components[i]
+			if component.node then
+				gui.set_enabled(component.node, component.enabled)
+			end
+		end
+
 		-- Resend special message to all components with the related interest
-		local components = self.components_interest[const.ON_LAYOUT_CHANGE]
+		components = self.components_interest[const.ON_LAYOUT_CHANGE]
 		for i = 1, #components do
 			components[i]:on_layout_change()
 		end
@@ -591,6 +603,9 @@ function M:new_widget(widget, template, nodes, ...)
 
 	if instance.init then
 		instance:init(...)
+	end
+	if instance.node then
+		instance.enabled = gui.is_enabled(instance.node, false)
 	end
 
 	if instance.on_late_init or (not self.input_inited and instance.on_input) then

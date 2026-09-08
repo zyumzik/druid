@@ -150,6 +150,26 @@ function M:get_node(node_id)
 end
 
 
+---Set component GUI node enabled state
+---@param state boolean Enabled state
+---@return druid.component self The component itself for chaining
+function M:set_node_enabled(state)
+	if self.node then
+		gui.set_enabled(self.node, state)
+	end
+
+	local components = self._meta.druid.components_all
+	for i = 1, #components do
+		local component = components[i]
+		if component.node == self.node then
+			component.enabled = state
+		end
+	end
+
+	return self
+end
+
+
 ---Get Druid instance for inner component creation.
 ---@protected
 ---@param template string|nil

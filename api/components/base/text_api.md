@@ -161,7 +161,7 @@ Set text area size
 
 ---
 ```lua
-text:fit_parent([parent], [padding])
+text:fit_parent([parent], [padding], [preserve_aspect_ratio])
 ```
 
 Keep the text bounds fitted to the visible size of a stretch-adjusted parent node. The text node stays in `gui.ADJUST_FIT`; bounds are refreshed after window resize and GUI layout changes.
@@ -169,6 +169,7 @@ Keep the text bounds fitted to the visible size of a stretch-adjusted parent nod
 - **Parameters:**
 	- `[parent]` *(string|node|nil)*: Parent box node. Default: text node parent
 	- `[padding]` *(vector4|number|nil)*: Padding in pixels: left, top, right, bottom, or the same value for all sides
+	- `[preserve_aspect_ratio]` *(boolean|nil)*: Keep the text's initial scale ratio. Default: false
 
 - **Returns:**
 	- `self` *(druid.text)*: Current text instance

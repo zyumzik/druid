@@ -207,16 +207,46 @@ end
 ---Keep the text bounds fitted to the visible size of a stretch-adjusted parent node
 ---@param parent string|node|nil Parent box node. Default: text node parent
 ---@param padding vector4|number|nil Padding in pixels: left, top, right, bottom, or the same value for all sides
+---@param preserve_aspect_ratio boolean|nil Keep the text's initial scale ratio. Default: false
 ---@return druid.text self Current text instance
-function M:fit_parent(parent, padding)
+function M:fit_parent(parent, padding, preserve_aspect_ratio)
 	self._fit_parent_node = parent and self:get_node(parent) or gui.get_parent(self.node)
 	assert(self._fit_parent_node, "Text node should have a parent or receive one in fit_parent")
 	self._fit_parent_padding = type(padding) == "number" and
 		vmath.vector4(padding, padding, padding, padding) or
 		padding or vmath.vector4()
+	self._fit_parent_aspect_ratio = preserve_aspect_ratio and self.start_scale.y ~= 0 and
+		math.abs(self.start_scale.x / self.start_scale.y) or nil
 	self:_sync_fit_parent()
 
 	return self
+end
+
+
+---@private
+function M:_apply_fit_parent_aspect_ratio()
+	local target_ratio = self._fit_parent_aspect_ratio
+	if not target_ratio or target_ratio == 0 then
+		return
+	end
+
+	local window_width, window_height = window.get_size()
+	local parent_scale = helper.get_scene_scale(self.node)
+	local scale = vmath.vector3(self.scale)
+	local visual_x = math.abs(scale.x * parent_scale.x * window_width / gui.get_width())
+	local visual_y = math.abs(scale.y * parent_scale.y * window_height / gui.get_height())
+
+	if visual_x == 0 or visual_y == 0 then
+		return
+	end
+
+	local ratio = visual_x / visual_y
+	if ratio > target_ratio then
+		scale.x = scale.x * target_ratio / ratio
+	else
+		scale.y = scale.y * ratio / target_ratio
+	end
+	gui.set_scale(self.node, scale)
 end
 
 
@@ -519,6 +549,7 @@ end
 function M:_update_adjust()
 	if not self.adjust_type or self.adjust_type == "no_adjust" then
 		self:_reset_default_scale()
+		self:_apply_fit_parent_aspect_ratio()
 		return
 	end
 
@@ -556,6 +587,8 @@ function M:_update_adjust()
 		self:_update_text_area_size()
 		self:_update_text_with_trim_left(self.style.TRIM_POSTFIX)
 	end
+
+	self:_apply_fit_parent_aspect_ratio()
 end
 
 

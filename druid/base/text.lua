@@ -234,8 +234,10 @@ function M:_sync_fit_parent()
 	end
 
 	local padding = self._fit_parent_padding
-	size.x = math.max(0, size.x - padding.x - padding.z)
-	size.y = math.max(0, size.y - padding.y - padding.w)
+	local parent_scale = helper.get_scene_scale(self._fit_parent_node, true)
+	local text_scale = vmath.mul_per_elem(helper.get_scene_scale(self.node), self.start_scale)
+	size.x = text_scale.x ~= 0 and math.max(0, size.x - padding.x - padding.z) * parent_scale.x / text_scale.x or 0
+	size.y = text_scale.y ~= 0 and math.max(0, size.y - padding.y - padding.w) * parent_scale.y / text_scale.y or 0
 	gui.set_adjust_mode(self.node, gui.ADJUST_FIT)
 	self:set_size(size)
 end

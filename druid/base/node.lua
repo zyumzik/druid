@@ -61,20 +61,28 @@ function M:_update_stretch(lock_x, lock_y)
 	local stretch_x, stretch_y = get_stretch()
 	local position = gui.get_position(self.node)
 	local scale = gui.get_scale(self.node)
+	local previous_position = self._stretch_position
+	local previous_scale = self._stretch_scale
 
 	if self.stretch_lock_x or lock_x then
-		position.x = position.x * self._stretch_x / (lock_x and stretch_x or 1)
-		scale.x = scale.x * self._stretch_x / (lock_x and stretch_x or 1)
+		local position_stretch = previous_position and position.x == previous_position.x and self._stretch_x or 1
+		local scale_stretch = previous_scale and scale.x == previous_scale.x and self._stretch_x or 1
+		position.x = position.x * position_stretch / (lock_x and stretch_x or 1)
+		scale.x = scale.x * scale_stretch / (lock_x and stretch_x or 1)
 	end
 	if self.stretch_lock_y or lock_y then
-		position.y = position.y * self._stretch_y / (lock_y and stretch_y or 1)
-		scale.y = scale.y * self._stretch_y / (lock_y and stretch_y or 1)
+		local position_stretch = previous_position and position.y == previous_position.y and self._stretch_y or 1
+		local scale_stretch = previous_scale and scale.y == previous_scale.y and self._stretch_y or 1
+		position.y = position.y * position_stretch / (lock_y and stretch_y or 1)
+		scale.y = scale.y * scale_stretch / (lock_y and stretch_y or 1)
 	end
 
 	self._stretch_x = lock_x and stretch_x or 1
 	self._stretch_y = lock_y and stretch_y or 1
 	gui.set_position(self.node, position)
 	gui.set_scale(self.node, scale)
+	self._stretch_position = vmath.vector3(position)
+	self._stretch_scale = vmath.vector3(scale)
 end
 
 

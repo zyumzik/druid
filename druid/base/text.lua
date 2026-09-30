@@ -230,11 +230,23 @@ function M:_apply_fit_parent_aspect_ratio()
 		return
 	end
 
-	local window_width, window_height = window.get_size()
-	local parent_scale = helper.get_scene_scale(self.node)
+	local position = gui.get_position(self.node)
+	local screen_position = gui.get_screen_position(self.node)
+
+	local sample_position = vmath.vector3(position)
+	sample_position.x = sample_position.x + 1
+	gui.set_position(self.node, sample_position)
+	local parent_scale_x = vmath.length(gui.get_screen_position(self.node) - screen_position)
+
+	sample_position = vmath.vector3(position)
+	sample_position.y = sample_position.y + 1
+	gui.set_position(self.node, sample_position)
+	local parent_scale_y = vmath.length(gui.get_screen_position(self.node) - screen_position)
+	gui.set_position(self.node, position)
+
 	local scale = vmath.vector3(self.scale)
-	local visual_x = math.abs(scale.x * parent_scale.x * window_width / gui.get_width())
-	local visual_y = math.abs(scale.y * parent_scale.y * window_height / gui.get_height())
+	local visual_x = math.abs(scale.x) * parent_scale_x
+	local visual_y = math.abs(scale.y) * parent_scale_y
 
 	if visual_x == 0 or visual_y == 0 then
 		return

@@ -48,8 +48,6 @@ end
 
 ---@private
 function M:on_layout_change()
-	self._stretch_x = 1
-	self._stretch_y = 1
 	if self.stretch_lock_x or self.stretch_lock_y then
 		self:_update_stretch(self.stretch_lock_x, self.stretch_lock_y)
 	end

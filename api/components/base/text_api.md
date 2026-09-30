@@ -29,6 +29,7 @@ Create text node with druid: `text = druid:new_text(node_name, [initial_value], 
 - [set_text](#set_text)
 - [get_text](#get_text)
 - [set_size](#set_size)
+- [fit_parent](#fit_parent)
 - [set_color](#set_color)
 - [set_alpha](#set_alpha)
 - [set_scale](#set_scale)
@@ -152,6 +153,22 @@ Set text area size
 
 - **Parameters:**
 	- `size` *(vector3)*: The new text area size
+
+- **Returns:**
+	- `self` *(druid.text)*: Current text instance
+
+### fit_parent
+
+---
+```lua
+text:fit_parent([parent], [padding])
+```
+
+Keep the text bounds fitted to the visible size of a stretch-adjusted parent node. The text node stays in `gui.ADJUST_FIT`; bounds are refreshed after window resize and GUI layout changes.
+
+- **Parameters:**
+	- `[parent]` *(string|node|nil)*: Parent box node. Default: text node parent
+	- `[padding]` *(vector4|number|nil)*: Padding in pixels: left, top, right, bottom, or the same value for all sides
 
 - **Returns:**
 	- `self` *(druid.text)*: Current text instance

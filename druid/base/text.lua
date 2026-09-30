@@ -86,7 +86,19 @@ end
 
 ---@private
 function M:on_layout_change()
+	if self._fit_parent_node then
+		self:_sync_fit_parent()
+	end
+
 	self:set_text(self.last_value)
+end
+
+
+---@private
+function M:on_window_resized()
+	if self._fit_parent_node then
+		self:_sync_fit_parent()
+	end
 end
 
 
@@ -189,6 +201,43 @@ function M:set_size(size)
 	self:_update_adjust()
 
 	return self
+end
+
+
+---Keep the text bounds fitted to the visible size of a stretch-adjusted parent node
+---@param parent string|node|nil Parent box node. Default: text node parent
+---@param padding vector4|number|nil Padding in pixels: left, top, right, bottom, or the same value for all sides
+---@return druid.text self Current text instance
+function M:fit_parent(parent, padding)
+	self._fit_parent_node = parent and self:get_node(parent) or gui.get_parent(self.node)
+	assert(self._fit_parent_node, "Text node should have a parent or receive one in fit_parent")
+	self._fit_parent_padding = type(padding) == "number" and
+		vmath.vector4(padding, padding, padding, padding) or
+		padding or vmath.vector4()
+	self:_sync_fit_parent()
+
+	return self
+end
+
+
+---@private
+function M:_sync_fit_parent()
+	local size = gui.get_size(self._fit_parent_node)
+	local window_width, window_height = window.get_size()
+	local stretch_x = window_width / gui.get_width()
+	local stretch_y = window_height / gui.get_height()
+	local fit_scale = math.min(stretch_x, stretch_y)
+
+	if fit_scale > 0 then
+		size.x = size.x * stretch_x / fit_scale
+		size.y = size.y * stretch_y / fit_scale
+	end
+
+	local padding = self._fit_parent_padding
+	size.x = math.max(0, size.x - padding.x - padding.z)
+	size.y = math.max(0, size.y - padding.y - padding.w)
+	gui.set_adjust_mode(self.node, gui.ADJUST_FIT)
+	self:set_size(size)
 end
 
 

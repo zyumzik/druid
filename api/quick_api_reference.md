@@ -514,6 +514,7 @@ Inspect [API Here](components/base/text_api.md)
 ```lua
 local text = self.druid:new_text(node, [value], [no_adjust])
 
+text:fit_parent([parent], [padding])
 text:get_text()
 text:get_text_adjust()
 text:get_text_index_by_width(width)

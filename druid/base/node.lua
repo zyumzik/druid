@@ -72,6 +72,7 @@ function M:on_window_resized()
 		self:_update_size()
 	end
 	if self._pos_stretch_enabled then
+		self:_refresh_position_base()
 		self:_update_position()
 	end
 end
@@ -150,6 +151,27 @@ function M:_update_position()
 	end
 	gui.set_position(self.node, position)
 	self._applied_position = position
+	self._applied_pos_stretch_x = stretch_x
+	self._applied_pos_stretch_y = stretch_y
+end
+
+
+---@private
+function M:_refresh_position_base()
+	local position = gui.get_position(self.node)
+	local applied_position = self._applied_position
+	if not applied_position or
+		(position.x == applied_position.x and position.y == applied_position.y) then
+		return
+	end
+
+	if self._pos_stretch_x then
+		position.x = position.x / self._applied_pos_stretch_x
+	end
+	if self._pos_stretch_y then
+		position.y = position.y / self._applied_pos_stretch_y
+	end
+	self._base_positions[self._layout] = position
 end
 
 

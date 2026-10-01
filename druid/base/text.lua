@@ -204,19 +204,16 @@ function M:set_size(size)
 end
 
 
----Keep the text bounds fitted to the visible size of a stretch-adjusted parent node
+---Keep the text node size fitted to its parent node
 ---@param parent string|node|nil Parent box node. Default: text node parent
 ---@param padding vector4|number|nil Padding in pixels: left, top, right, bottom, or the same value for all sides
----@param preserve_aspect_ratio boolean|nil Keep the text's initial scale ratio. Default: false
 ---@return druid.text self Current text instance
-function M:fit_parent(parent, padding, preserve_aspect_ratio)
+function M:fit_parent(parent, padding)
 	self._fit_parent_node = parent and self:get_node(parent) or gui.get_parent(self.node)
 	assert(self._fit_parent_node, "Text node should have a parent or receive one in fit_parent")
 	self._fit_parent_padding = type(padding) == "number" and
 		vmath.vector4(padding, padding, padding, padding) or
 		padding or vmath.vector4()
-	self._fit_parent_aspect_ratio = preserve_aspect_ratio and self.start_scale.y ~= 0 and
-		math.abs(self.start_scale.x / self.start_scale.y) or nil
 	self:_sync_fit_parent()
 
 	return self
@@ -224,57 +221,8 @@ end
 
 
 ---@private
-function M:_apply_fit_parent_aspect_ratio()
-	local target_ratio = self._fit_parent_aspect_ratio
-	if not target_ratio or target_ratio == 0 then
-		return
-	end
-
-	local position = gui.get_position(self.node)
-	local screen_position = gui.get_screen_position(self.node)
-
-	local sample_position = vmath.vector3(position)
-	sample_position.x = sample_position.x + 1
-	gui.set_position(self.node, sample_position)
-	local parent_scale_x = vmath.length(gui.get_screen_position(self.node) - screen_position)
-
-	sample_position = vmath.vector3(position)
-	sample_position.y = sample_position.y + 1
-	gui.set_position(self.node, sample_position)
-	local parent_scale_y = vmath.length(gui.get_screen_position(self.node) - screen_position)
-	gui.set_position(self.node, position)
-
-	local scale = vmath.vector3(self.scale)
-	local visual_x = math.abs(scale.x) * parent_scale_x
-	local visual_y = math.abs(scale.y) * parent_scale_y
-
-	if visual_x == 0 or visual_y == 0 then
-		return
-	end
-
-	local ratio = visual_x / visual_y
-	if ratio > target_ratio then
-		scale.x = scale.x * target_ratio / ratio
-	else
-		scale.y = scale.y * ratio / target_ratio
-	end
-	gui.set_scale(self.node, scale)
-end
-
-
----@private
 function M:_sync_fit_parent()
 	local size = gui.get_size(self._fit_parent_node)
-	local window_width, window_height = window.get_size()
-	local stretch_x = window_width / gui.get_width()
-	local stretch_y = window_height / gui.get_height()
-	local fit_scale = math.min(stretch_x, stretch_y)
-
-	if fit_scale > 0 then
-		size.x = size.x * stretch_x / fit_scale
-		size.y = size.y * stretch_y / fit_scale
-	end
-
 	local padding = self._fit_parent_padding
 	local parent_scale = helper.get_scene_scale(self._fit_parent_node, true)
 	local text_scale = vmath.mul_per_elem(helper.get_scene_scale(self.node), self.start_scale)
@@ -561,7 +509,6 @@ end
 function M:_update_adjust()
 	if not self.adjust_type or self.adjust_type == "no_adjust" then
 		self:_reset_default_scale()
-		self:_apply_fit_parent_aspect_ratio()
 		return
 	end
 
@@ -599,8 +546,6 @@ function M:_update_adjust()
 		self:_update_text_area_size()
 		self:_update_text_with_trim_left(self.style.TRIM_POSTFIX)
 	end
-
-	self:_apply_fit_parent_aspect_ratio()
 end
 
 

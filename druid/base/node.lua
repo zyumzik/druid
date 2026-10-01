@@ -2,87 +2,95 @@ local component = require("druid.component")
 
 ---@class druid.node: druid.component
 ---@field node node The wrapped GUI node
----@field stretch_lock_x boolean True if horizontal stretch is locked
----@field stretch_lock_y boolean True if vertical stretch is locked
 local M = component.create("node")
 
 
 local function get_stretch()
 	local window_x, window_y = window.get_size()
-	local stretch_x = window_x / gui.get_width()
-	local stretch_y = window_y / gui.get_height()
-	local stretch = math.min(stretch_x, stretch_y)
-	return stretch_x / stretch, stretch_y / stretch
+	local fit = math.min(window_x / gui.get_width(), window_y / gui.get_height())
+	if fit == 0 then
+		return 1, 1
+	end
+	return window_x / gui.get_width() / fit, window_y / gui.get_height() / fit
 end
 
 
 ---@param node node|string The GUI node or node id
 function M:init(node)
 	self.node = self:get_node(node)
-	self.stretch_lock_x = false
-	self.stretch_lock_y = false
-	self._stretch_x = 1
-	self._stretch_y = 1
+	self._initial_adjust_mode = gui.get_adjust_mode(self.node)
+	self._initial_size_mode = gui.get_size_mode(self.node)
+	self._initial_size = gui.get_size(self.node)
+	self._layout = gui.get_layout()
+	self._base_sizes = { [self._layout] = self._initial_size }
+	self._stretch_x = false
+	self._stretch_y = false
+	self._size_stretch_enabled = false
 end
 
 
----Lock the Defold stretch adjustment on selected axes
----@param lock_x boolean Lock horizontal stretching
----@param lock_y boolean Lock vertical stretching
+---Stretch the node through its size instead of its scale
+---@param stretch_x boolean Stretch the width
+---@param stretch_y boolean Stretch the height
 ---@return druid.node self The node component itself for chaining
-function M:set_stretch_lock(lock_x, lock_y)
-	self:_update_stretch(lock_x, lock_y)
-	self.stretch_lock_x = lock_x
-	self.stretch_lock_y = lock_y
+function M:set_size_stretch(stretch_x, stretch_y)
+	self._stretch_x = stretch_x
+	self._stretch_y = stretch_y
+	self._size_stretch_enabled = true
+	gui.set_adjust_mode(self.node, gui.ADJUST_FIT)
+	gui.set_size_mode(self.node, gui.SIZE_MODE_MANUAL)
+	self:_update_size()
 	return self
 end
 
 
 ---@private
 function M:on_window_resized()
-	if self.stretch_lock_x or self.stretch_lock_y then
-		self:_update_stretch(self.stretch_lock_x, self.stretch_lock_y)
+	if self._size_stretch_enabled and gui.get_layout() == self._layout then
+		self:_update_size()
 	end
 end
 
 
 ---@private
 function M:on_layout_change()
-	if self.stretch_lock_x or self.stretch_lock_y then
-		self:_update_stretch(self.stretch_lock_x, self.stretch_lock_y)
+	if not self._size_stretch_enabled then
+		return
 	end
+
+	local layout = gui.get_layout()
+	local size = gui.get_size(self.node)
+	local applied_size = self._applied_size
+	if not applied_size or size.x ~= applied_size.x or size.y ~= applied_size.y then
+		self._base_sizes[layout] = size
+	end
+	self._layout = layout
+	gui.set_adjust_mode(self.node, gui.ADJUST_FIT)
+	gui.set_size_mode(self.node, gui.SIZE_MODE_MANUAL)
+	self:_update_size()
 end
 
 
 ---@private
----@param lock_x boolean
----@param lock_y boolean
-function M:_update_stretch(lock_x, lock_y)
+function M:on_remove()
+	gui.set_size(self.node, self._base_sizes[gui.get_layout()] or self._initial_size)
+	gui.set_adjust_mode(self.node, self._initial_adjust_mode)
+	gui.set_size_mode(self.node, self._initial_size_mode)
+end
+
+
+---@private
+function M:_update_size()
+	local size = vmath.vector3(self._base_sizes[gui.get_layout()] or self._initial_size)
 	local stretch_x, stretch_y = get_stretch()
-	local position = gui.get_position(self.node)
-	local scale = gui.get_scale(self.node)
-	local previous_position = self._stretch_position
-	local previous_scale = self._stretch_scale
-
-	if self.stretch_lock_x or lock_x then
-		local position_stretch = previous_position and position.x == previous_position.x and self._stretch_x or 1
-		local scale_stretch = previous_scale and scale.x == previous_scale.x and self._stretch_x or 1
-		position.x = position.x * position_stretch / (lock_x and stretch_x or 1)
-		scale.x = scale.x * scale_stretch / (lock_x and stretch_x or 1)
+	if self._stretch_x then
+		size.x = size.x * stretch_x
 	end
-	if self.stretch_lock_y or lock_y then
-		local position_stretch = previous_position and position.y == previous_position.y and self._stretch_y or 1
-		local scale_stretch = previous_scale and scale.y == previous_scale.y and self._stretch_y or 1
-		position.y = position.y * position_stretch / (lock_y and stretch_y or 1)
-		scale.y = scale.y * scale_stretch / (lock_y and stretch_y or 1)
+	if self._stretch_y then
+		size.y = size.y * stretch_y
 	end
-
-	self._stretch_x = lock_x and stretch_x or 1
-	self._stretch_y = lock_y and stretch_y or 1
-	gui.set_position(self.node, position)
-	gui.set_scale(self.node, scale)
-	self._stretch_position = vmath.vector3(position)
-	self._stretch_scale = vmath.vector3(scale)
+	gui.set_size(self.node, size)
+	self._applied_size = size
 end
 
 

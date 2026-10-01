@@ -16,14 +16,15 @@
     10. [Input](#input)
     11. [Lang Text](#lang-text)
     12. [Layout](#layout)
-    13. [Progress](#progress)
-    14. [Rich Input](#rich-input)
-    15. [Rich Text](#rich-text)
-    16. [Scroll](#scroll)
-    17. [Slider](#slider)
-    18. [Swipe](#swipe)
-    19. [Text](#text)
-    20. [Timer](#timer)
+    13. [Node](#node)
+    14. [Progress](#progress)
+    15. [Rich Input](#rich-input)
+    16. [Rich Text](#rich-text)
+    17. [Scroll](#scroll)
+    18. [Slider](#slider)
+    19. [Swipe](#swipe)
+    20. [Text](#text)
+    21. [Timer](#timer)
 4. [Helper](#helper)
 5. [Druid Color](#druid-color)
 
@@ -387,6 +388,17 @@ layout:set_type(type)
 layout:update()
 
 layout.on_size_changed
+```
+
+### [Node](components/base/node_api.md)
+
+Inspect [API Here](components/base/node_api.md)
+
+```lua
+local node = self.druid:new_node(node)
+
+node:set_pos_stretch(stretch_x, stretch_y)
+node:set_size_stretch(stretch_x, stretch_y)
 ```
 
 ### [Progress](components/extended/progress_api.md)

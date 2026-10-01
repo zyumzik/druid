@@ -17,6 +17,7 @@ The Druid Factory used to create components
 - [set_whitelist](#set_whitelist)
 - [set_blacklist](#set_blacklist)
 - [new_widget](#new_widget)
+- [new_node](#new_node)
 - [new_button](#new_button)
 - [new_blocker](#new_blocker)
 - [new_back_handler](#new_back_handler)
@@ -213,6 +214,21 @@ Create new Druid widget instance
 
 - **Returns:**
 	- `widget` *(<T:druid.component>)*: The new ready to use widget
+
+### new_node
+
+---
+```lua
+instance:new_node(node_or_node_id)
+```
+
+Create Node component
+
+- **Parameters:**
+	- `node_or_node_id` *(string|node)*: The node id or GUI node
+
+- **Returns:**
+	- `node` *(druid.node)*: The new node component
 
 ### new_button
 
